@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:giffluter/modules/giff/gif_service.dart';
+import 'package:giffluter/pages/Home/components/grid_builder.dart';
+import 'package:giffluter/ui/color_theme.dart';
+
+import 'components/text_input.dart';
 
 class Home extends StatefulWidget {
   const Home({ Key? key }) : super(key: key);
@@ -10,14 +14,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final giffService = GiffService();
+  var searchController = TextEditingController();
+  
+  int offset = 0;
 
-  @override
-  void initState() {
-    super.initState();
-
-    giffService.getGifs()
-    .then((gifs) {
-      print(gifs["data"]);
+  void submitSearch(String text) {
+    setState(() {
+      searchController.text = text;
     });
   }
 
@@ -26,9 +29,15 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Image.network('https://developers.giphy.com/static/img/dev-logo-lg.gif'),
+        centerTitle: true,
+        backgroundColor: ColorTheme.backgorund,
       ),
-      body: Container(
-        child: Text('Hello'),
+      backgroundColor: ColorTheme.backgorund,
+      body: Column(
+        children:  [
+          SearchField(textController: searchController, searchSubmit: submitSearch),
+          GridBuilder(getGifs: giffService.getGifs(search: searchController.text, offset: offset))
+        ]
       ),
     );
   }
