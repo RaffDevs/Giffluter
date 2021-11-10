@@ -100,7 +100,6 @@ class GridBuilder extends StatelessWidget {
               if (snapshot.hasError) {
                 return const Text('Error');
               } else {
-                print('Opa');
                 return _gridGifs(context, snapshot, offset);
               }
           }
