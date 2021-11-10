@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:giffluter/pages/Gif/page_gif.dart';
 import 'package:giffluter/ui/color_theme.dart';
+import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class GridBuilder extends StatelessWidget {
-  const GridBuilder({Key? key, required this.getGifs}) : super(key: key);
+  const GridBuilder({
+    Key? key, 
+    required this.getGifs, 
+    required this.moreGifs,
+    required this.offset,
+  }) : super(key: key);
 
   final Future getGifs;
+  final Function(int limit) moreGifs;
+  final int offset;
 
-  Widget _gridGifs(BuildContext context, AsyncSnapshot snapshot) {
+  Widget _gridGifs(BuildContext context, AsyncSnapshot snapshot, int offset) {
     final data = snapshot.data["data"];
 
     return GridView.builder(
@@ -14,38 +24,52 @@ class GridBuilder extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10
       ),
-      itemCount: data.length + 1,
+      itemCount: offset + 1,
       itemBuilder: (context, index) {
         if (index == data.length) {
-          return Card(
-            color: ColorTheme.backgorund,
-            elevation: 10,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.add,
-                  size: 50,
-                  color: ColorTheme.foreground,
-                ),
-                Text(
-                  'Carregar mais...',
-                  style: TextStyle(
-                    color: ColorTheme.foreground
+          return GestureDetector(
+            child: Card(
+              color: ColorTheme.backgorund,
+              elevation: 10,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.add,
+                    size: 50,
+                    color: ColorTheme.foreground,
+                  ),
+                  Text(
+                    'Carregar mais...',
+                    style: TextStyle(
+                      color: ColorTheme.foreground
+                    )
                   )
-                )
-              ],
+                ],
+              ),
             ),
+            onTap: () {
+              moreGifs(offset);
+            },
           );
         }
         else {
           return GestureDetector(
-            child: Image.network(
-              data[index]["images"]["fixed_height"]["url"],
+            child: FadeInImage.memoryNetwork(
+              placeholder: kTransparentImage,
+              image: data[index]["images"]["fixed_height"]["url"],
               height: 300,
               fit: BoxFit.cover,
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => GifPage(gifData: data[index]))
+              );
+            },
+            onLongPress: () {
+              Share.share(data[index]["images"]["fixed_height"]["url"]);
+            },
           );
         }
         
@@ -76,7 +100,7 @@ class GridBuilder extends StatelessWidget {
               if (snapshot.hasError) {
                 return const Text('Error');
               } else {
-                return _gridGifs(context, snapshot);
+                return _gridGifs(context, snapshot, offset);
               }
           }
         },

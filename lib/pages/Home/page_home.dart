@@ -16,11 +16,17 @@ class _HomeState extends State<Home> {
   final giffService = GiffService();
   var searchController = TextEditingController();
   
-  int offset = 0;
+  int offset = 19;
 
   void submitSearch(String text) {
     setState(() {
       searchController.text = text;
+    });
+  }
+
+   moreGifs(int limit) {
+    setState(() {
+      offset += limit;
     });
   }
 
@@ -36,7 +42,11 @@ class _HomeState extends State<Home> {
       body: Column(
         children:  [
           SearchField(textController: searchController, searchSubmit: submitSearch),
-          GridBuilder(getGifs: giffService.getGifs(search: searchController.text, offset: offset))
+          GridBuilder(
+            getGifs: giffService.getGifs(search: searchController.text, offset: offset),
+            moreGifs: moreGifs, 
+            offset: offset
+          )
         ]
       ),
     );
